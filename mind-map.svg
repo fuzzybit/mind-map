@@ -1,0 +1,64 @@
+<!--
+
+	FuzzyBit Mind-Map Business Modelling Framework by fuzzybit.com is licensed
+	under a Creative Commons Attribution-ShareAlike 4.0 International License.
+
+	Based on a work at https://www.fuzzybit.com/mind-map/.
+
+-->
+<svg version="1.1"
+	baseProfile="full"
+	width="680"
+	height="600"
+	style="margin-top: 40px;"
+	xmlns="http://www.w3.org/2000/svg">
+
+	<rect width="100%" height="100%" fill="rgb(124,224,255)" />
+
+	<circle cx="300" cy="300" r="200" fill="lightblue" />
+	<text x="235" y="25" font-size="20" text-anchor="middle" fill="black" font-family="arial">FuzzyBit Mind-Map Business Modelling Framework</text>
+	<text x="56" y="588" font-size="20" text-anchor="middle" fill="black" font-family="arial" onclick="window.location='https://creativecommons.org/licenses/by-sa/4.0/';">CC BY-SA </text>
+	<text x="170" y="588" font-size="20" text-anchor="middle" fill="black" font-family="arial" onclick="window.location='https://www.fuzzybit.com/';">fuzzybit.com </text>
+	<text x="360" y="588" font-size="20" text-anchor="middle" fill="black" font-family="arial" onclick="window.location='mailto:mind-map@fuzzybit.com';">&lt;mind-map@fuzzybit.com&gt;</text>
+
+	<!-- STREAM -->
+	<line id="EX" stroke="black" stroke-width="1" />
+	<text id="EX_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('EX');"></text>
+
+	<line id="PR" stroke="black" stroke-width="1" />
+	<text id="PR_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('PR');"></text>
+
+	<line id="RE" stroke="black" stroke-width="1" />
+	<text id="RE_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('RE');"></text>
+
+	<line id="AN" stroke="black" stroke-width="1" />
+	<text id="AN_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('AN');"></text>
+
+	<!-- CLUSTER -->
+	<circle id="PS" fill="black" onclick="c.click(this.id);" />
+	<text id="PS_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+	<circle id="MV" fill="black" onclick="c.click(this.id);" />
+	<text id="MV_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+	<circle id="GP" fill="black" onclick="c.click(this.id);" />
+	<text id="GP_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+	<circle id="FI" fill="black" onclick="c.click(this.id);" />
+	<text id="FI_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+	<circle id="SM" fill="black" onclick="c.click(this.id);" />
+	<text id="SM_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+	<circle id="MA" fill="black" onclick="c.click(this.id);" />
+	<text id="MA_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+	<circle id="RA" fill="black" onclick="c.click(this.id);" />
+	<text id="RA_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+	<circle id="ML" fill="black" onclick="c.click(this.id);" />
+	<text id="ML_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+	<circle id="OP" fill="black" onclick="c.click(this.id);" />
+	<text id="OP_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+</svg>
