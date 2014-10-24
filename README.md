@@ -6,9 +6,9 @@ Mind-Map Business Modelling Framework
 contents
 ========
 
-mind-map.svg
-mind-map.js
-README.md
+* mind-map.svg
+* mind-map.js
+* README.md
 
 license
 =======
