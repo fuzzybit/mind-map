@@ -1,16 +1,13 @@
-mind-map
-=
+# mind-map
 
 Mind-Map Business Modeling Framework
 
-contents
-=
+## contents
 
 * mind-map.svg
 * mind-map.js
 * README.md
 
-license
-=
+## license
 
 Please note the Creative Commons license in the files.
