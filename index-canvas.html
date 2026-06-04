@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>mind-map (canvas)</title>
+        <style>
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                background: #f4f8ff;
+            }
+            #mindmap {
+                display: block;
+                margin: 40px auto;
+                border: 1px solid #aaa;
+                background: #7ce0ff;
+            }
+        </style>
+    </head>
+    <body onload="init()">
+        <canvas id="mindmap" width="680" height="600"></canvas>
+        <script>
+            const canvas = document.getElementById('mindmap');
+            const ctx = canvas.getContext('2d');
+
+            const canvasWidth = 680;
+            const canvasHeight = 600;
+            const center = { x: 300, y: 300 };
+            const ring = 170;
+            const smallCircleRadius = 8;
+            const littleCircleDistance = 40;
+            const streamOuterRing = ring + 50;
+            const clusterMargin = 24;
+
+            const clusterDefs = [
+                { id: 'PS', label: 'Product / Service', rad: null },
+                { id: 'FI', label: 'Financial', rad: 0/4 },
+                { id: 'ML', label: 'Management & Labour', rad: 1/4 },
+                { id: 'MV', label: 'Mission & Vision', rad: 2/4 },
+                { id: 'MA', label: 'Market Analysis', rad: 3/4 },
+                { id: 'SM', label: 'Sales & Marketing', rad: 4/4 },
+                { id: 'OP', label: 'Operations', rad: 5/4 },
+                { id: 'GP', label: 'Governance, Policy, Ethics', rad: 6/4 },
+                { id: 'RA', label: 'Risk Analysis', rad: 7/4 }
+            ];
+
+            const streamDefs = [
+                { id: 'RE', label: 'REVENUE', rad: 0/4 },
+                { id: 'PR', label: 'PRODUCTION', rad: 1/4 },
+                { id: 'EX', label: 'EXECUTIVE', rad: 2/4 },
+                { id: 'AN', label: 'ANALYTICAL', rad: 3/4 }
+            ];
+
+            const footerLinks = [
+                { text: 'CC BY-SA', url: 'https://creativecommons.org/licenses/by-sa/4.0/', x: 56, y: 588 },
+                { text: 'fuzzybit.com', url: 'https://www.fuzzybit.com/', x: 170, y: 588 },
+                { text: '<mind-map@fuzzybit.com>', url: 'mailto:mind-map@fuzzybit.com', x: 360, y: 588 }
+            ];
+
+            let clusters = [];
+            let streams = [];
+            let streamLabelBoxes = [];
+            let footerLabelBoxes = [];
+            let littleCircles = [];
+            let selectedStream = null;
+            let activeCluster = null;
+
+            function createPositions() {
+                clusters = clusterDefs.map(def => {
+                    if (def.rad === null) {
+                        return { ...def, x: center.x, y: center.y };
+                    }
+                    const angle = def.rad * Math.PI;
+                    return {
+                        ...def,
+                        x: center.x - ring * Math.cos(angle),
+                        y: center.y - ring * Math.sin(angle)
+                    };
+                });
+
+                streams = streamDefs.map(def => {
+                    const angle = def.rad * Math.PI;
+                    const x1 = center.x - streamOuterRing * Math.cos(angle);
+                    const y1 = center.y - streamOuterRing * Math.sin(angle);
+                    const x2 = center.x + streamOuterRing * Math.cos(angle);
+                    const y2 = center.y + streamOuterRing * Math.sin(angle);
+                    return {
+                        ...def,
+                        x1,
+                        y1,
+                        x2,
+                        y2,
+                        labelX: x1 + 10,
+                        labelY: y1 + 10
+                    };
+                });
+            }
+
+            function drawBackground() {
+                ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+                ctx.fillStyle = '#7ce0ff';
+                ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+                ctx.beginPath();
+                ctx.arc(center.x, center.y, 200, 0, Math.PI * 2);
+                ctx.fillStyle = 'lightblue';
+                ctx.fill();
+            }
+
+            function drawText() {
+                ctx.textBaseline = 'alphabetic';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'black';
+                ctx.font = '20px Arial';
+                ctx.fillText('FuzzyBit Mind-Map Business Modelling Framework', 300, 35);
+
+                footerLabelBoxes = [];
+                ctx.textAlign = 'left';
+                footerLinks.forEach(link => {
+                    ctx.fillStyle = 'black';
+                    ctx.fillText(link.text, link.x, link.y);
+                    const metrics = ctx.measureText(link.text);
+                    footerLabelBoxes.push({ x: link.x, y: link.y - 20, width: metrics.width, height: 26, url: link.url });
+                });
+            }
+
+            function drawStreams() {
+                streamLabelBoxes = [];
+                streams.forEach(stream => {
+                    const isSelected = selectedStream === stream.id;
+                    if (isSelected) {
+                        ctx.strokeStyle = 'black';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(stream.x1, stream.y1);
+                        ctx.lineTo(stream.x2, stream.y2);
+                        ctx.stroke();
+                    }
+
+                    ctx.font = '18px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.fillStyle = isSelected ? 'black' : 'white';
+                    ctx.fillText(stream.label, stream.labelX, stream.labelY);
+                    const metrics = ctx.measureText(stream.label);
+                    streamLabelBoxes.push({ x: stream.labelX, y: stream.labelY - 18, width: metrics.width, height: 24, id: stream.id });
+                });
+            }
+
+            function drawClusters() {
+                ctx.textAlign = 'center';
+                ctx.font = '18px Arial';
+                clusters.forEach(cluster => {
+                    const isCenter = cluster.rad === null;
+                    ctx.fillStyle = '#000';
+                    ctx.beginPath();
+                    ctx.arc(cluster.x, cluster.y, smallCircleRadius, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = 'black';
+                    const labelX = cluster.x;
+                    const labelY = cluster.y + clusterMargin;
+                    ctx.fillText(cluster.label, labelX, labelY);
+                });
+            }
+
+            function drawLittleCircles() {
+                if (!activeCluster) {
+                    return;
+                }
+
+                const cluster = clusters.find(item => item.id === activeCluster);
+                if (!cluster) {
+                    return;
+                }
+
+                littleCircles.forEach(circle => {
+                    ctx.fillStyle = '#000';
+                    ctx.beginPath();
+                    ctx.arc(circle.x, circle.y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = circle.stream === selectedStream ? 'black' : 'white';
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(circle.stream, circle.x, circle.y + 24);
+                });
+
+                if (selectedStream) {
+                    const stream = streams.find(item => item.id === selectedStream);
+                    if (stream) {
+                        const angle = stream.rad * Math.PI;
+                        const lineLength = cluster === undefined ? 0 : ring / 3 + 14;
+                        const fromX = cluster.x - lineLength * Math.cos(angle);
+                        const fromY = cluster.y - lineLength * Math.sin(angle);
+                        const toX = cluster.x + lineLength * Math.cos(angle);
+                        const toY = cluster.y + lineLength * Math.sin(angle);
+                        ctx.strokeStyle = 'black';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(fromX, fromY);
+                        ctx.lineTo(toX, toY);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            function drawAll() {
+                drawBackground();
+                drawText();
+                drawStreams();
+                drawClusters();
+                drawLittleCircles();
+            }
+
+            function buildLittleCircles(clusterId) {
+                const cluster = clusters.find(item => item.id === clusterId);
+                if (!cluster) {
+                    littleCircles = [];
+                    return;
+                }
+                activeCluster = clusterId;
+                littleCircles = [];
+                for (let i = 0; i < 8; i += 1) {
+                    const rad = i / 4;
+                    const angle = rad * Math.PI;
+                    const x = cluster.x - littleCircleDistance * Math.cos(angle);
+                    const y = cluster.y - littleCircleDistance * Math.sin(angle);
+                    const stream = [
+                        'RE', 'PR', 'EX', 'AN',
+                        'RE', 'PR', 'EX', 'AN'
+                    ][i];
+                    littleCircles.push({ id: 'id_0_' + i, x, y, stream, rad });
+                }
+            }
+
+            function findClickedFooter(x, y) {
+                return footerLabelBoxes.find(box => x >= box.x && x <= box.x + box.width && y >= box.y && y <= box.y + box.height);
+            }
+
+            function findClickedStream(x, y) {
+                return streamLabelBoxes.find(box => x >= box.x && x <= box.x + box.width && y >= box.y && y <= box.y + box.height);
+            }
+
+            function findClickedLittleCircle(x, y) {
+                return littleCircles.find(circle => {
+                    const dx = x - circle.x;
+                    const dy = y - circle.y;
+                    return dx * dx + dy * dy <= 25;
+                });
+            }
+
+            function findClickedCluster(x, y) {
+                return clusters.find(cluster => {
+                    const dx = x - cluster.x;
+                    const dy = y - cluster.y;
+                    return dx * dx + dy * dy <= smallCircleRadius * smallCircleRadius;
+                });
+            }
+
+            function handleClick(event) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const x = (event.clientX - rect.left) * scaleX;
+                const y = (event.clientY - rect.top) * scaleY;
+
+                const footerHit = findClickedFooter(x, y);
+                if (footerHit) {
+                    window.location = footerHit.url;
+                    return;
+                }
+
+                const littleHit = findClickedLittleCircle(x, y);
+                if (littleHit) {
+                    selectedStream = littleHit.stream;
+                    drawAll();
+                    return;
+                }
+
+                const clusterHit = findClickedCluster(x, y);
+                if (clusterHit) {
+                    buildLittleCircles(clusterHit.id);
+                    drawAll();
+                    return;
+                }
+
+                const streamHit = findClickedStream(x, y);
+                if (streamHit) {
+                    selectedStream = streamHit.id;
+                    drawAll();
+                    return;
+                }
+            }
+
+            function init() {
+                createPositions();
+                drawAll();
+                canvas.addEventListener('click', handleClick);
+            }
+        </script>
+    </body>
+</html>
