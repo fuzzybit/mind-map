@@ -2,65 +2,331 @@
 <html lang="en">
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <title>mind-map</title>
+        <title>FuzzyBit Mind-Map Business Modelling Framework</title>
         <script type="text/javascript" src="mind-map.js"></script>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                padding: 24px;
+                color: #172b3a;
+                font-family: Arial, sans-serif;
+                background: #f4f8ff;
+            }
+
+            .model-layout {
+                display: grid;
+                grid-template-columns: minmax(0, 680px) minmax(360px, 520px);
+                align-items: center;
+                justify-content: center;
+                gap: 24px;
+                max-width: 1240px;
+                margin: 0 auto;
+            }
+
+            .mind-map {
+                display: block;
+                width: 100%;
+                height: auto;
+                border: 1px solid #aaa;
+                background: #7ce0ff;
+            }
+
+            .areas-panel h1 {
+                margin: 0 0 8px;
+                font-size: 1.5rem;
+            }
+
+            .areas-panel p {
+                margin: 0 0 16px;
+                color: #455b6a;
+                line-height: 1.45;
+            }
+
+            .area-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+            }
+
+            .area-grid-frame {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                grid-template-rows: auto auto auto;
+                align-items: center;
+                column-gap: 10px;
+                row-gap: 8px;
+            }
+
+            .area-grid-frame > .area-grid {
+                grid-column: 1;
+                grid-row: 2;
+            }
+
+            .stream-label {
+                justify-self: center;
+                padding: 6px 9px;
+                border-radius: 999px;
+                color: #fff;
+                font-size: 0.68rem;
+                font-weight: 700;
+                letter-spacing: 0.035em;
+                line-height: 1.1;
+            }
+
+            .stream-label--executive {
+                grid-column: 1;
+                grid-row: 1;
+                background: #7651a8;
+            }
+
+            .stream-label--analytical {
+                grid-column: 2;
+                grid-row: 1;
+                align-self: end;
+                justify-self: start;
+                background: #c06b22;
+            }
+
+            .stream-label--financial {
+                grid-column: 2;
+                grid-row: 2;
+                padding: 9px 6px;
+                writing-mode: horizontal-tb;
+                background: #087f8c;
+            }
+
+            .stream-label--production {
+                grid-column: 2;
+                grid-row: 3;
+                align-self: start;
+                justify-self: start;
+                background: #32804a;
+            }
+
+            .area-card {
+                display: flex;
+                min-height: 112px;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-start;
+                padding: 12px;
+                border: 1px solid #cbd6df;
+                border-left: 4px solid #718096;
+                border-radius: 8px;
+                color: #172b3a;
+                text-align: left;
+                font: inherit;
+                background: #fff;
+                cursor: pointer;
+                transition: box-shadow 120ms ease, transform 120ms ease, background-color 120ms ease;
+            }
+
+            .area-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgb(23 43 58 / 14%);
+            }
+
+            .area-card:focus-visible {
+                outline: 3px solid #1769aa;
+                outline-offset: 2px;
+            }
+
+            .area-card[aria-pressed="true"] {
+                box-shadow: inset 0 0 0 2px #1769aa;
+            }
+
+            .area-card[data-stream-active="true"] {
+                background: #edf5ff;
+            }
+
+            .area-card strong {
+                font-size: 0.98rem;
+                line-height: 1.25;
+            }
+
+            .area-card[data-stream="EX"] { border-left-color: #7651a8; }
+            .area-card[data-stream="AN"] { border-left-color: #c06b22; }
+            .area-card[data-stream="RE"] { border-left-color: #087f8c; }
+            .area-card[data-stream="PR"] { border-left-color: #32804a; }
+
+            .area-card--center {
+                align-items: center;
+                justify-content: center;
+                border: 2px solid #1769aa;
+                text-align: center;
+                background: #e8f3ff;
+            }
+
+            @media (max-width: 1050px) {
+                .model-layout {
+                    grid-template-columns: minmax(0, 680px);
+                }
+            }
+
+            @media (max-width: 480px) {
+                body {
+                    padding: 12px;
+                }
+
+                .model-layout {
+                    gap: 16px;
+                }
+
+                .area-grid {
+                    gap: 6px;
+                }
+
+                .area-grid-frame {
+                    grid-template-columns: minmax(0, 1fr);
+                    grid-template-rows: auto auto auto auto auto;
+                    gap: 6px;
+                }
+
+                .area-grid-frame > .area-grid {
+                    grid-column: 1;
+                    grid-row: 3;
+                }
+
+                .stream-label--executive {
+                    grid-column: 1;
+                    grid-row: 1;
+                }
+
+                .stream-label--analytical {
+                    grid-column: 1;
+                    grid-row: 2;
+                    padding: 6px 9px;
+                    justify-self: end;
+                    transform: none;
+                }
+
+                .stream-label--financial {
+                    grid-column: 1;
+                    grid-row: 4;
+                    justify-self: end;
+                    writing-mode: horizontal-tb;
+                }
+
+                .stream-label--production {
+                    grid-column: 1;
+                    grid-row: 5;
+                    justify-self: end;
+                    padding: 6px 9px;
+                    transform: none;
+                }
+
+                .area-card {
+                    min-height: 104px;
+                    padding: 8px;
+                }
+
+                .area-card strong {
+                    font-size: 0.82rem;
+                }
+
+            }
+        </style>
     </head>
     <body onload="init()">
-        <svg version="1.1"
-        baseProfile="full"
-        width="680"
-        height="600"
-        style="margin-top: 40px;"
-        xmlns="http://www.w3.org/2000/svg">
-        
-            <rect width="100%" height="100%" fill="rgb(124,224,255)" />
-        
-            <circle cx="300" cy="300" r="200" fill="lightblue" />
-            <text x="235" y="25" font-size="20" text-anchor="middle" fill="black" font-family="arial">FuzzyBit Mind-Map Business Modelling Framework</text>
-            <text x="56" y="588" font-size="20" text-anchor="middle" fill="black" font-family="arial" onclick="window.location='https://creativecommons.org/licenses/by-sa/4.0/';">CC BY-SA </text>
-            <text x="170" y="588" font-size="20" text-anchor="middle" fill="black" font-family="arial" onclick="window.location='https://www.fuzzybit.com/';">fuzzybit.com </text>
-            <text x="360" y="588" font-size="20" text-anchor="middle" fill="black" font-family="arial" onclick="window.location='mailto:mind-map@fuzzybit.com';">&lt;mind-map@fuzzybit.com&gt;</text>
-        
-            <!-- STREAM -->
-            <line id="EX" stroke="black" stroke-width="1" />
-            <text id="EX_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('EX');"></text>
-        
-            <line id="PR" stroke="black" stroke-width="1" />
-            <text id="PR_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('PR');"></text>
-        
-            <line id="RE" stroke="black" stroke-width="1" />
-            <text id="RE_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('RE');"></text>
-        
-            <line id="AN" stroke="black" stroke-width="1" />
-            <text id="AN_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('AN');"></text>
-        
-            <!-- CLUSTER -->
-            <circle id="PS" fill="black" onclick="c.click(this.id);" />
-            <text id="PS_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
-        
-            <circle id="MV" fill="black" onclick="c.click(this.id);" />
-            <text id="MV_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
-        
-            <circle id="GP" fill="black" onclick="c.click(this.id);" />
-            <text id="GP_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
-        
-            <circle id="FI" fill="black" onclick="c.click(this.id);" />
-            <text id="FI_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
-        
-            <circle id="SM" fill="black" onclick="c.click(this.id);" />
-            <text id="SM_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
-        
-            <circle id="MA" fill="black" onclick="c.click(this.id);" />
-            <text id="MA_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
-        
-            <circle id="RA" fill="black" onclick="c.click(this.id);" />
-            <text id="RA_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
-        
-            <circle id="ML" fill="black" onclick="c.click(this.id);" />
-            <text id="ML_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
-        
-            <circle id="OP" fill="black" onclick="c.click(this.id);" />
-            <text id="OP_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
-        </svg>
+        <main class="model-layout">
+            <svg class="mind-map" version="1.1"
+                baseProfile="full"
+                width="680"
+                height="600"
+                viewBox="0 0 680 600"
+                xmlns="http://www.w3.org/2000/svg">
+                <rect width="100%" height="100%" fill="rgb(124,224,255)" />
+                <circle cx="300" cy="300" r="200" fill="lightblue" />
+                <text x="235" y="25" font-size="20" text-anchor="middle" fill="black" font-family="arial">FuzzyBit Mind-Map Business Modelling Framework</text>
+                <text x="56" y="588" font-size="20" text-anchor="middle" fill="black" font-family="arial" onclick="window.location='https://creativecommons.org/licenses/by-sa/4.0/';">CC BY-SA </text>
+                <text x="170" y="588" font-size="20" text-anchor="middle" fill="black" font-family="arial" onclick="window.location='https://www.fuzzybit.com/';">fuzzybit.com </text>
+                <text x="360" y="588" font-size="20" text-anchor="middle" fill="black" font-family="arial" onclick="window.location='mailto:mind-map@fuzzybit.com';">&lt;mind-map@fuzzybit.com&gt;</text>
+
+                <!-- STREAM -->
+                <line id="EX" stroke="black" stroke-width="1" />
+                <text id="EX_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('EX');"></text>
+
+                <line id="PR" stroke="black" stroke-width="1" />
+                <text id="PR_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('PR');"></text>
+
+                <line id="RE" stroke="black" stroke-width="1" />
+                <text id="RE_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('RE');"></text>
+
+                <line id="AN" stroke="black" stroke-width="1" />
+                <text id="AN_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('AN');"></text>
+
+                <!-- AREAS -->
+                <circle id="PS" fill="black" onclick="c.click(this.id);" />
+                <text id="PS_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+                <circle id="MV" fill="black" onclick="c.click(this.id);" />
+                <text id="MV_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+                <circle id="GP" fill="black" onclick="c.click(this.id);" />
+                <text id="GP_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+                <circle id="FI" fill="black" onclick="c.click(this.id);" />
+                <text id="FI_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+                <circle id="SM" fill="black" onclick="c.click(this.id);" />
+                <text id="SM_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+                <circle id="MA" fill="black" onclick="c.click(this.id);" />
+                <text id="MA_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+                <circle id="RA" fill="black" onclick="c.click(this.id);" />
+                <text id="RA_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+                <circle id="ML" fill="black" onclick="c.click(this.id);" />
+                <text id="ML_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+
+                <circle id="OP" fill="black" onclick="c.click(this.id);" />
+                <text id="OP_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+            </svg>
+
+            <section class="areas-panel" aria-labelledby="areas-title">
+                <h1 id="areas-title">Business model areas</h1>
+                <p>Select a card to focus its area and stream in the mind-map. The four streams surround the grid; Product/Service is the shared center.</p>
+                <div class="area-grid-frame">
+                    <span class="stream-label stream-label--executive">EXECUTIVE</span>
+                    <span class="stream-label stream-label--analytical">ANALYTICAL</span>
+                    <span class="stream-label stream-label--financial">FINANCIAL</span>
+                    <span class="stream-label stream-label--production">PRODUCTION</span>
+                    <div class="area-grid" aria-label="Nine business model areas">
+                        <button class="area-card" type="button" data-area-card="ML" data-stream="PR" data-stream-active="false" aria-pressed="false">
+                            <strong>Management &amp; Human Resources</strong>
+                        </button>
+                        <button class="area-card" type="button" data-area-card="MV" data-stream="EX" data-stream-active="false" aria-pressed="false">
+                            <strong>Mission &amp; Vision</strong>
+                        </button>
+                        <button class="area-card" type="button" data-area-card="MA" data-stream="AN" data-stream-active="false" aria-pressed="false">
+                            <strong>Market Analysis</strong>
+                        </button>
+                        <button class="area-card" type="button" data-area-card="FI" data-stream="RE" data-stream-active="false" aria-pressed="false">
+                            <strong>Accounting</strong>
+                        </button>
+                        <button class="area-card area-card--center" type="button" data-area-card="PS" data-stream-active="false" aria-pressed="false">
+                            <strong>Product / Service</strong>
+                        </button>
+                        <button class="area-card" type="button" data-area-card="SM" data-stream="RE" data-stream-active="false" aria-pressed="false">
+                            <strong>Sales &amp; Marketing</strong>
+                        </button>
+                        <button class="area-card" type="button" data-area-card="RA" data-stream="AN" data-stream-active="false" aria-pressed="false">
+                            <strong>Risk Analysis</strong>
+                        </button>
+                        <button class="area-card" type="button" data-area-card="GP" data-stream="EX" data-stream-active="false" aria-pressed="false">
+                            <strong>Ethics / Law / By-laws</strong>
+                        </button>
+                        <button class="area-card" type="button" data-area-card="OP" data-stream="PR" data-stream-active="false" aria-pressed="false">
+                            <strong>Operations</strong>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
     </body>
 </html>

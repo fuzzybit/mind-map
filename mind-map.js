@@ -6,27 +6,33 @@
  */
 
 /**
- * Centres of circles
+ * Centre point of the main mind-map layout, in SVG user coordinates.
  */
 var cx = 300;
 var cy = 300;
 /**
- * Diameter of primary circle
+ * Radius used to position the primary cluster around the centre.
  */
 var ring = 170;
 /**
- * Diameter of cluster point
+ * Radius of each primary cluster point.
  */
 var r = 8;
 
 /**
- * Cluster and stream object creation
+ * Shared layout controllers. Click handlers update these objects as the
+ * selected cluster and stream change.
  */
 var c = new cluster(cx, cy, ring, r);
 var s = new stream(cx, cy, ring);
 
 /**
- * Cluster Class
+ * Positions and labels the cluster points around a centre.
+ *
+ * @param {number} cx - Centre x-coordinate in SVG user units.
+ * @param {number} cy - Centre y-coordinate in SVG user units.
+ * @param {number} ring - Distance from the centre to an outer cluster point.
+ * @param {number} r - Radius assigned to each cluster point.
  */
 function cluster(cx, cy, ring, r) {
 	this.cx = cx;
@@ -34,7 +40,7 @@ function cluster(cx, cy, ring, r) {
 	this.ring = ring;
 	this.r = r;
 
-	// quarter pi radians 
+	// Angles are fractions of PI; successive points are spaced by PI/4 (45 degrees).
 	this.z = 1/4;
 	this.a = 0 * this.z;
 	this.b = 1 * this.z;
@@ -46,6 +52,12 @@ function cluster(cx, cy, ring, r) {
 	this.h = 7 * this.z;
 }
 
+/**
+ * Place an SVG circle at the centre or at the requested angle on the ring.
+ *
+ * @param {string} id - ID of the existing SVG circle element.
+ * @param {number} [rad] - Angle as a multiple of PI; omitted places it at the centre.
+ */
 cluster.prototype.set = function(id, rad) {
 	var innerRing = 0;
 	if (typeof rad !== 'undefined')
@@ -54,11 +66,19 @@ cluster.prototype.set = function(id, rad) {
 		rad = 0;
 
 	var circle = document.getElementById(id);
+	// TODO: Validate required SVG elements and report missing IDs rather than failing on attribute updates.
 	circle.setAttribute("r", this.r);
 	circle.setAttribute("cx", this.cx - innerRing * Math.cos(rad * Math.PI));
 	circle.setAttribute("cy", this.cy - innerRing * Math.sin(rad * Math.PI));
 }
 
+/**
+ * Position a cluster point and set the matching SVG text label.
+ *
+ * @param {string} id - Base ID shared by the circle and its `${id}_label` text element.
+ * @param {string} label - Text to append to the label element.
+ * @param {number} [rad] - Angle as a multiple of PI; omitted places the point at the centre.
+ */
 cluster.prototype.label = function(id, label, rad) {
 	this.set(id, rad);
 
@@ -73,14 +93,23 @@ cluster.prototype.label = function(id, label, rad) {
 	var text = document.getElementById(id + "_label");
 
 	var node = document.createTextNode(label);
+	// TODO: Preserve text-only rendering; validate length/content if labels become externally sourced.
+	// TODO: Decide whether repeated initialization should replace existing label text to avoid duplicates.
 	text.appendChild(node);
 	text.setAttribute("x", this.cx - innerRing * Math.cos(rad * Math.PI));
 	text.setAttribute("y", this.cy - innerRing * Math.sin(rad * Math.PI) + margin);
 }
 
+/**
+ * Expand a selected primary cluster into eight smaller points and reposition
+ * the active stream, if one has already been selected.
+ *
+ * @param {string} label - ID of the selected primary SVG circle.
+ */
 cluster.prototype.click = function(label) {
 	var data = document.getElementById(label);
 
+	// TODO: Validate the selected element and its coordinates before parsing; malformed SVG attributes currently propagate as invalid geometry.
 	this.cx = parseInt(data.getAttribute("cx"));
 	this.cy = parseInt(data.getAttribute("cy"));
 	this.ring = 40;
@@ -119,7 +148,11 @@ cluster.prototype.click = function(label) {
 }
 
 /**
- * Stream Class
+ * Positions a stream line and updates its associated labels and visibility.
+ *
+ * @param {number} cx - Centre x-coordinate in SVG user units.
+ * @param {number} cy - Centre y-coordinate in SVG user units.
+ * @param {number} ring - Base distance from the centre used to size the stream.
  */
 function stream(cx, cy, ring) {
 	this.cx = cx;
@@ -130,6 +163,12 @@ function stream(cx, cy, ring) {
 	this.rad;
 }
 
+/**
+ * Set the endpoints of an existing SVG line across the stream's outer ring.
+ *
+ * @param {string} id - ID of the existing SVG line element.
+ * @param {number} rad - Line angle as a multiple of PI.
+ */
 stream.prototype.set = function(id, rad) {
 	var line = document.getElementById(id);
 	line.setAttribute("x1", this.cx - this.outerRing * Math.cos(rad * Math.PI));
@@ -138,6 +177,13 @@ stream.prototype.set = function(id, rad) {
 	line.setAttribute("y2", this.cy + this.outerRing * Math.sin(rad * Math.PI));
 }
 
+/**
+ * Set the stream line and place its text label near the selected endpoint.
+ *
+ * @param {string} id - Base ID shared by the line and its `${id}_label` text element.
+ * @param {string} label - Text to append to the label element.
+ * @param {number} [rad] - Angle as a multiple of PI; omitted places the label at the centre.
+ */
 stream.prototype.label = function(id, label, rad) {
 	if (typeof rad === 'undefined') {
 		rad = 0;
@@ -151,26 +197,50 @@ stream.prototype.label = function(id, label, rad) {
 	var text = document.getElementById(id + "_label");
 
 	var node = document.createTextNode(label);
+	// TODO: Keep initialization idempotent if init() can be called more than once.
 	text.appendChild(node);
 	text.setAttribute("x", this.cx - this.outerRing * Math.cos(rad * Math.PI) + margin);
 	text.setAttribute("y", this.cy - this.outerRing * Math.sin(rad * Math.PI) + margin);
 }
 
+/**
+ * Highlight the selected stream label and dim the other stream labels.
+ *
+ * @param {string} label - ID of the selected stream.
+ * @param {string} datum - ID of the stream label to update.
+ */
 stream.prototype.streamHelper = function(label, datum) {
 	var text = document.getElementById(datum + "_label");
 	text.setAttribute("fill", label == datum ? "black" : "white");
 }
 
+/**
+ * Show the selected stream's line and hide the other stream lines.
+ *
+ * @param {string} label - ID of the selected stream.
+ * @param {string} datum - ID of the stream line to update.
+ */
 stream.prototype.lineHelper = function(label, datum) {
 	var line = document.getElementById(datum);
 	line.setAttribute("visibility", label == datum ? "visible" : "hidden");
 }
 
+/**
+ * Update both the label styling and line visibility for one stream.
+ *
+ * @param {string} label - ID of the selected stream.
+ * @param {string} datum - ID of the stream to update.
+ */
 stream.prototype.setHelper = function(label, datum) {
 	this.streamHelper(label, datum);
 	this.lineHelper(label, datum);
 }
 
+/**
+ * Select a primary stream, update all stream indicators, and draw its line.
+ *
+ * @param {string} label - Stream ID: RE, PR, EX, or AN.
+ */
 stream.prototype.click = function(label) {
 	switch (label) {
 		case "RE":
@@ -198,6 +268,7 @@ stream.prototype.click = function(label) {
 
 	var svg = document.getElementsByTagName("svg")[0];
 
+	// TODO: Factor shared SVG line creation into one helper to keep both click paths consistent.
 	var id = "id_1";
 
 	var line = document.getElementById(id);
@@ -215,6 +286,11 @@ stream.prototype.click = function(label) {
 	s.set(id, this.rad);
 }
 
+/**
+ * Select a smaller point in an expanded cluster and map it back to its stream.
+ *
+ * @param {string} label - ID of the selected small point (`id_0_0` through `id_0_7`).
+ */
 stream.prototype.littleClick = function(label) {
 	switch (label) {
 		case "id_0_0":
@@ -247,6 +323,7 @@ stream.prototype.littleClick = function(label) {
 
 	var svg = document.getElementsByTagName("svg")[0];
 
+	// TODO: Factor shared SVG line creation into one helper to keep both click paths consistent.
 	var id = "id_1";
 
 	var line = document.getElementById(id);
@@ -264,6 +341,12 @@ stream.prototype.littleClick = function(label) {
 	s.set(id, this.rad);
 }
 
+/**
+ * Populate the SVG's primary cluster labels and stream labels.
+ * The corresponding circle, line, and text elements must already exist in the document.
+ *
+ * TODO: Add keyboard-operable controls and accessible names for interactive SVG points.
+ */
 function init() {
 	c.label("PS", "Product / Service");
 	c.label("FI", "Financial", 0/4);
