@@ -35,6 +35,26 @@
                 background: #7ce0ff;
             }
 
+            .mind-map circle[aria-pressed="true"] {
+                fill: #1769aa;
+                stroke: #fff;
+                stroke-width: 3px;
+            }
+
+            .mind-map line[id^="id_1_"] {
+                pointer-events: none;
+            }
+
+            .mind-map circle[id^="id_0_"][data-stream-active="false"] {
+                fill: #8794a0;
+                opacity: 0.45;
+            }
+
+            .mind-map circle[id^="id_0_"][data-stream-active="true"][data-stream="EX"] { fill: #7651a8; }
+            .mind-map circle[id^="id_0_"][data-stream-active="true"][data-stream="AN"] { fill: #c06b22; }
+            .mind-map circle[id^="id_0_"][data-stream-active="true"][data-stream="RE"] { fill: #087f8c; }
+            .mind-map circle[id^="id_0_"][data-stream-active="true"][data-stream="PR"] { fill: #32804a; }
+
             .areas-panel h1 {
                 margin: 0 0 8px;
                 font-size: 1.5rem;
@@ -53,57 +73,52 @@
             }
 
             .area-grid-frame {
-                display: grid;
-                grid-template-columns: minmax(0, 1fr) auto;
-                grid-template-rows: auto auto auto;
-                align-items: center;
-                column-gap: 10px;
-                row-gap: 8px;
+                display: block;
             }
 
-            .area-grid-frame > .area-grid {
-                grid-column: 1;
-                grid-row: 2;
+            .stream-labels {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+                margin-bottom: 8px;
             }
 
             .stream-label {
-                justify-self: center;
                 padding: 6px 9px;
+                border: 0;
                 border-radius: 999px;
                 color: #fff;
                 font-size: 0.68rem;
                 font-weight: 700;
                 letter-spacing: 0.035em;
                 line-height: 1.1;
+                font-family: inherit;
+                cursor: pointer;
+            }
+
+            .stream-label:focus-visible {
+                outline: 3px solid #1769aa;
+                outline-offset: 2px;
+            }
+
+            .stream-label[data-stream-active="true"] {
+                box-shadow: 0 0 0 3px #172b3a;
             }
 
             .stream-label--executive {
-                grid-column: 1;
-                grid-row: 1;
                 background: #7651a8;
             }
 
             .stream-label--analytical {
-                grid-column: 2;
-                grid-row: 1;
-                align-self: end;
-                justify-self: start;
                 background: #c06b22;
             }
 
             .stream-label--financial {
-                grid-column: 2;
-                grid-row: 2;
-                padding: 9px 6px;
-                writing-mode: horizontal-tb;
                 background: #087f8c;
             }
 
             .stream-label--production {
-                grid-column: 2;
-                grid-row: 3;
-                align-self: start;
-                justify-self: start;
                 background: #32804a;
             }
 
@@ -115,7 +130,7 @@
                 align-items: flex-start;
                 padding: 12px;
                 border: 1px solid #cbd6df;
-                border-left: 4px solid #718096;
+                border-left: 2px solid #718096;
                 border-radius: 8px;
                 color: #172b3a;
                 text-align: left;
@@ -136,7 +151,15 @@
             }
 
             .area-card[aria-pressed="true"] {
-                box-shadow: inset 0 0 0 2px #1769aa;
+                border-width: 5px;
+            }
+
+            .area-card[data-multi-selected="true"] {
+                border-width: 4px;
+            }
+
+            .area-card[data-area-focused="true"] {
+                border-width: 5px;
             }
 
             .area-card[data-stream-active="true"] {
@@ -152,6 +175,10 @@
             .area-card[data-stream="AN"] { border-left-color: #c06b22; }
             .area-card[data-stream="RE"] { border-left-color: #087f8c; }
             .area-card[data-stream="PR"] { border-left-color: #32804a; }
+            .area-card[data-stream="EX"][data-area-focused="true"] { border-color: #7651a8; }
+            .area-card[data-stream="AN"][data-area-focused="true"] { border-color: #c06b22; }
+            .area-card[data-stream="RE"][data-area-focused="true"] { border-color: #087f8c; }
+            .area-card[data-stream="PR"][data-area-focused="true"] { border-color: #32804a; }
 
             .area-card--center {
                 align-items: center;
@@ -180,43 +207,13 @@
                     gap: 6px;
                 }
 
-                .area-grid-frame {
-                    grid-template-columns: minmax(0, 1fr);
-                    grid-template-rows: auto auto auto auto auto;
-                    gap: 6px;
+                .stream-labels {
+                    gap: 4px;
                 }
 
-                .area-grid-frame > .area-grid {
-                    grid-column: 1;
-                    grid-row: 3;
-                }
-
-                .stream-label--executive {
-                    grid-column: 1;
-                    grid-row: 1;
-                }
-
-                .stream-label--analytical {
-                    grid-column: 1;
-                    grid-row: 2;
-                    padding: 6px 9px;
-                    justify-self: end;
-                    transform: none;
-                }
-
-                .stream-label--financial {
-                    grid-column: 1;
-                    grid-row: 4;
-                    justify-self: end;
-                    writing-mode: horizontal-tb;
-                }
-
-                .stream-label--production {
-                    grid-column: 1;
-                    grid-row: 5;
-                    justify-self: end;
-                    padding: 6px 9px;
-                    transform: none;
+                .stream-label {
+                    padding: 4px 5px;
+                    font-size: 0.56rem;
                 }
 
                 .area-card {
@@ -248,80 +245,82 @@
 
                 <!-- STREAM -->
                 <line id="EX" stroke="black" stroke-width="1" />
-                <text id="EX_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('EX');"></text>
+                <text id="EX_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('EX', event.ctrlKey);"></text>
 
                 <line id="PR" stroke="black" stroke-width="1" />
-                <text id="PR_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('PR');"></text>
+                <text id="PR_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('PR', event.ctrlKey);"></text>
 
                 <line id="RE" stroke="black" stroke-width="1" />
-                <text id="RE_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('RE');"></text>
+                <text id="RE_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('RE', event.ctrlKey);"></text>
 
                 <line id="AN" stroke="black" stroke-width="1" />
-                <text id="AN_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('AN');"></text>
+                <text id="AN_label" font-size="18" text-anchor="left" fill="black" font-family="arial" onclick="s.click('AN', event.ctrlKey);"></text>
 
                 <!-- AREAS -->
-                <circle id="PS" fill="black" onclick="c.click(this.id);" />
-                <text id="PS_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+                <circle id="PS" fill="black" onclick="resetMap();" />
+                <text id="PS_label" font-size="18" text-anchor="middle" fill="black" font-family="arial" onclick="resetMap();"></text>
 
-                <circle id="MV" fill="black" onclick="c.click(this.id);" />
-                <text id="MV_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+                <circle id="MV" fill="black" onclick="selectArea(this.id, event.ctrlKey);" />
+                <text id="MV_label" font-size="18" text-anchor="middle" fill="black" font-family="arial" onclick="selectArea('MV', event.ctrlKey);"></text>
 
-                <circle id="GP" fill="black" onclick="c.click(this.id);" />
-                <text id="GP_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+                <circle id="GP" fill="black" onclick="selectArea(this.id, event.ctrlKey);" />
+                <text id="GP_label" font-size="18" text-anchor="middle" fill="black" font-family="arial" onclick="selectArea('GP', event.ctrlKey);"></text>
 
-                <circle id="FI" fill="black" onclick="c.click(this.id);" />
-                <text id="FI_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+                <circle id="FI" fill="black" onclick="selectArea(this.id, event.ctrlKey);" />
+                <text id="FI_label" font-size="18" text-anchor="middle" fill="black" font-family="arial" onclick="selectArea('FI', event.ctrlKey);"></text>
 
-                <circle id="SM" fill="black" onclick="c.click(this.id);" />
-                <text id="SM_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+                <circle id="SM" fill="black" onclick="selectArea(this.id, event.ctrlKey);" />
+                <text id="SM_label" font-size="18" text-anchor="middle" fill="black" font-family="arial" onclick="selectArea('SM', event.ctrlKey);"></text>
 
-                <circle id="MA" fill="black" onclick="c.click(this.id);" />
-                <text id="MA_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+                <circle id="MA" fill="black" onclick="selectArea(this.id, event.ctrlKey);" />
+                <text id="MA_label" font-size="18" text-anchor="middle" fill="black" font-family="arial" onclick="selectArea('MA', event.ctrlKey);"></text>
 
-                <circle id="RA" fill="black" onclick="c.click(this.id);" />
-                <text id="RA_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+                <circle id="RA" fill="black" onclick="selectArea(this.id, event.ctrlKey);" />
+                <text id="RA_label" font-size="18" text-anchor="middle" fill="black" font-family="arial" onclick="selectArea('RA', event.ctrlKey);"></text>
 
-                <circle id="ML" fill="black" onclick="c.click(this.id);" />
-                <text id="ML_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+                <circle id="ML" fill="black" onclick="selectArea(this.id, event.ctrlKey);" />
+                <text id="ML_label" font-size="18" text-anchor="middle" fill="black" font-family="arial" onclick="selectArea('ML', event.ctrlKey);"></text>
 
-                <circle id="OP" fill="black" onclick="c.click(this.id);" />
-                <text id="OP_label" font-size="18" text-anchor="middle" fill="black" font-family="arial"></text>
+                <circle id="OP" fill="black" onclick="selectArea(this.id, event.ctrlKey);" />
+                <text id="OP_label" font-size="18" text-anchor="middle" fill="black" font-family="arial" onclick="selectArea('OP', event.ctrlKey);"></text>
             </svg>
 
             <section class="areas-panel" aria-labelledby="areas-title">
                 <h1 id="areas-title">Business model areas</h1>
-                <p>Select a card to focus its area and stream in the mind-map. The four streams surround the grid; Product/Service is the shared center.</p>
+                <p>Select an area to focus it or a stream to show its line. Hold Ctrl while selecting to toggle multiple streams or areas.</p>
                 <div class="area-grid-frame">
-                    <span class="stream-label stream-label--executive">EXECUTIVE</span>
-                    <span class="stream-label stream-label--analytical">ANALYTICAL</span>
-                    <span class="stream-label stream-label--financial">FINANCIAL</span>
-                    <span class="stream-label stream-label--production">PRODUCTION</span>
+                    <div class="stream-labels" aria-label="Business model streams">
+                        <button class="stream-label stream-label--executive" type="button" data-stream="EX" data-stream-active="false" aria-pressed="false" onclick="s.click('EX', event.ctrlKey);">EXECUTIVE</button>
+                        <button class="stream-label stream-label--analytical" type="button" data-stream="AN" data-stream-active="false" aria-pressed="false" onclick="s.click('AN', event.ctrlKey);">ANALYTICAL</button>
+                        <button class="stream-label stream-label--financial" type="button" data-stream="RE" data-stream-active="false" aria-pressed="false" onclick="s.click('RE', event.ctrlKey);">FINANCIAL</button>
+                        <button class="stream-label stream-label--production" type="button" data-stream="PR" data-stream-active="false" aria-pressed="false" onclick="s.click('PR', event.ctrlKey);">PRODUCTION</button>
+                    </div>
                     <div class="area-grid" aria-label="Nine business model areas">
-                        <button class="area-card" type="button" data-area-card="ML" data-stream="PR" data-stream-active="false" aria-pressed="false">
+                        <button class="area-card" type="button" data-area-card="ML" data-stream="PR" data-stream-active="false" data-area-focused="false" aria-pressed="false">
                             <strong>Management &amp; Human Resources</strong>
                         </button>
-                        <button class="area-card" type="button" data-area-card="MV" data-stream="EX" data-stream-active="false" aria-pressed="false">
+                        <button class="area-card" type="button" data-area-card="MV" data-stream="EX" data-stream-active="false" data-area-focused="false" aria-pressed="false">
                             <strong>Mission &amp; Vision</strong>
                         </button>
-                        <button class="area-card" type="button" data-area-card="MA" data-stream="AN" data-stream-active="false" aria-pressed="false">
+                        <button class="area-card" type="button" data-area-card="MA" data-stream="AN" data-stream-active="false" data-area-focused="false" aria-pressed="false">
                             <strong>Market Analysis</strong>
                         </button>
-                        <button class="area-card" type="button" data-area-card="FI" data-stream="RE" data-stream-active="false" aria-pressed="false">
+                        <button class="area-card" type="button" data-area-card="FI" data-stream="RE" data-stream-active="false" data-area-focused="false" aria-pressed="false">
                             <strong>Accounting</strong>
                         </button>
-                        <button class="area-card area-card--center" type="button" data-area-card="PS" data-stream-active="false" aria-pressed="false">
+                        <button class="area-card area-card--center" type="button" data-area-card="PS" data-stream-active="false" data-area-focused="false" aria-pressed="false">
                             <strong>Product / Service</strong>
                         </button>
-                        <button class="area-card" type="button" data-area-card="SM" data-stream="RE" data-stream-active="false" aria-pressed="false">
+                        <button class="area-card" type="button" data-area-card="SM" data-stream="RE" data-stream-active="false" data-area-focused="false" aria-pressed="false">
                             <strong>Sales &amp; Marketing</strong>
                         </button>
-                        <button class="area-card" type="button" data-area-card="RA" data-stream="AN" data-stream-active="false" aria-pressed="false">
+                        <button class="area-card" type="button" data-area-card="RA" data-stream="AN" data-stream-active="false" data-area-focused="false" aria-pressed="false">
                             <strong>Risk Analysis</strong>
                         </button>
-                        <button class="area-card" type="button" data-area-card="GP" data-stream="EX" data-stream-active="false" aria-pressed="false">
+                        <button class="area-card" type="button" data-area-card="GP" data-stream="EX" data-stream-active="false" data-area-focused="false" aria-pressed="false">
                             <strong>Ethics / Law / By-laws</strong>
                         </button>
-                        <button class="area-card" type="button" data-area-card="OP" data-stream="PR" data-stream-active="false" aria-pressed="false">
+                        <button class="area-card" type="button" data-area-card="OP" data-stream="PR" data-stream-active="false" data-area-focused="false" aria-pressed="false">
                             <strong>Operations</strong>
                         </button>
                     </div>
